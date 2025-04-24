@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  
+  <title>From Neuron to Prediction - A Journey Through Deep Learning | Zizi&#39;s Lab</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="description" content="I’ve been learning the fundamentals of deep learning and neural networks and want to use this blog to document my high-level understanding of how we train a model — starting from very basic raw data.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="From Neuron to Prediction - A Journey Through Deep Learning">
+<meta property="og:url" content="https://zoz24.github.io/2025/04/24/nn-training-cycle/index.html">
+<meta property="og:site_name" content="Zizi&#39;s Lab">
+<meta property="og:description" content="I’ve been learning the fundamentals of deep learning and neural networks and want to use this blog to document my high-level understanding of how we train a model — starting from very basic raw data.">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2025-04-24T20:07:53.000Z">
+<meta property="article:modified_time" content="2025-04-24T21:20:40.223Z">
+<meta property="article:author" content="Zizi">
+<meta property="article:tag" content="deep learning">
+<meta name="twitter:card" content="summary">
+  
+    <link rel="alternate" href="/atom.xml" title="Zizi's Lab" type="application/atom+xml">
+  
+  
+    <link rel="shortcut icon" href="/favicon.png">
+  
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+    
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.min.css">
+
+  
+  
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/fork-awesome@1.2.0/css/fork-awesome.min.css">
+
+<meta name="generator" content="Hexo 7.3.0"></head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">Zizi&#39;s Lab</a>
+      </h1>
+      
+        <h2 id="subtitle-wrap">
+          <a href="/" id="subtitle">A space for me record interesting stuff</a>
+        </h2>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"><span class="fa fa-bars"></span></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+        
+          <a class="nav-icon" href="/atom.xml" title="RSS Feed"><span class="fa fa-rss"></span></a>
+        
+        <a class="nav-icon nav-search-btn" title="Search"><span class="fa fa-search"></span></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="https://zoz24.github.io"></form>
+      </div>
+    </div>
+  </div>
+</header>
+
+      <div class="outer">
+        <section id="main"><article id="post-nn-training-cycle" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2025/04/24/nn-training-cycle/" class="article-date">
+  <time class="dt-published" datetime="2025-04-24T20:07:53.000Z" itemprop="datePublished">2025-04-24</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="p-name article-title" itemprop="headline name">
+      From Neuron to Prediction - A Journey Through Deep Learning
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <p>I’ve been learning the fundamentals of deep learning and neural networks and want to use this blog to document my high-level understanding of how we train a model — starting from very basic raw data.</p>
+<span id="more"></span>
+
+<h3 id="🧠-What-Are-Neural-Networks"><a href="#🧠-What-Are-Neural-Networks" class="headerlink" title="🧠 What Are Neural Networks"></a>🧠 What Are Neural Networks</h3><p>A good analogy for neural networks is our human brain. Just like synapses in our brain that process inputs and produce outputs by interacting with other neurons, artificial neurons in a neural network function similarly. These digital connections form the foundation of all the AI magic we see today.</p>
+<hr>
+<h3 id="🧾-Raw-Data"><a href="#🧾-Raw-Data" class="headerlink" title="🧾 Raw Data"></a>🧾 Raw Data</h3><p>Before diving deeper, let’s assume we have a dataset with information about the housing market. The first few lines might look like this:</p>
+<table>
+<thead>
+<tr>
+<th>Address</th>
+<th>Bedrooms</th>
+<th>Bathrooms</th>
+<th>Square Feet</th>
+<th>Price</th>
+<th>Year Built</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>123 Main St</td>
+<td>3</td>
+<td>2</td>
+<td>1,800</td>
+<td>$350,000</td>
+<td>1998</td>
+</tr>
+<tr>
+<td>456 Oak Ave</td>
+<td>4</td>
+<td>2.5</td>
+<td>2,400</td>
+<td>$425,000</td>
+<td>2005</td>
+</tr>
+<tr>
+<td>789 Pine Ln</td>
+<td>2</td>
+<td>1</td>
+<td>1,200</td>
+<td>$275,000</td>
+<td>1975</td>
+</tr>
+<tr>
+<td>321 Maple Dr</td>
+<td>5</td>
+<td>3</td>
+<td>3,200</td>
+<td>$550,000</td>
+<td>2015</td>
+</tr>
+<tr>
+<td>654 Cedar Blvd</td>
+<td>3</td>
+<td>2</td>
+<td>1,950</td>
+<td>$380,000</td>
+<td>2001</td>
+</tr>
+</tbody></table>
+<p>From this raw data, we need to define a few important concepts:</p>
+<ul>
+<li><strong>Feature</strong>: An attribute that is measurable within the dataset — e.g., <code>Bedrooms</code>, <code>Year Built</code>, <code>Square Feet</code>.</li>
+<li><strong>Sample</strong>: A single row from the dataset that contains values for all features.</li>
+<li><strong>Label</strong>: The target value we want the model to predict — in this case, the <code>Price</code> of a house.</li>
+</ul>
+<hr>
+<h3 id="⚖️-Independent-vs-Dependent-Variables"><a href="#⚖️-Independent-vs-Dependent-Variables" class="headerlink" title="⚖️ Independent vs Dependent Variables"></a>⚖️ Independent vs Dependent Variables</h3><p>Training a neural network involves two sets of data:</p>
+<ul>
+<li><strong>Independent variables</strong> (features): What we feed into the model.</li>
+<li><strong>Dependent variable</strong> (label): What we want the model to predict.</li>
+</ul>
+<p>If you’ve done any science experiments, this should feel familiar. We provide the model with inputs (features), it processes them, and outputs a prediction — much like how we take in information and make decisions.</p>
+<hr>
+<h3 id="📊-Feature-Vectors-and-Weights"><a href="#📊-Feature-Vectors-and-Weights" class="headerlink" title="📊 Feature Vectors and Weights"></a>📊 Feature Vectors and Weights</h3><p>Each row in the dataset can be represented as a <strong>feature vector</strong> — a list of values corresponding to each feature.</p>
+<p>Our model starts with a set of randomly initialized <strong>weights</strong>, one for each feature. These weights indicate how important each feature is when making predictions.</p>
+<p>To generate a prediction, we compute the <strong>dot product</strong> of the feature vector and the weight vector:</p>
+<p>Prediction &#x3D; w₁x₁ + w₂x₂ + … + wₙxₙ + b</p>
+<p>The term <code>b</code> is called the <strong>bias</strong>. It’s a constant added to shift the predictions up or down. For example, if your model tends to underpredict prices across the board, adjusting the bias can help correct that.</p>
+<p>We repeat this calculation for each sample in the dataset.</p>
+<hr>
+<h3 id="🧮-From-Raw-Sum-to-Prediction"><a href="#🧮-From-Raw-Sum-to-Prediction" class="headerlink" title="🧮 From Raw Sum to Prediction"></a>🧮 From Raw Sum to Prediction</h3><p>Now that we have a raw sum from the dot product, it’s time to apply an <strong>activation function</strong>.</p>
+<p>An activation function introduces <strong>non-linearity</strong> into the model. This is crucial because real-world data rarely follows perfect linear patterns. Activation functions allow the model to learn complex, non-linear relationships.</p>
+<p>Common activation functions include:</p>
+<ul>
+<li><strong>Sigmoid</strong> (outputs a value between 0 and 1)</li>
+<li><strong>ReLU</strong> (rectified linear unit — replaces negative values with 0)</li>
+</ul>
+<p>For now, the key idea is: <strong>activation functions help the network think in more sophisticated ways</strong>.</p>
+<hr>
+<h3 id="❌-Loss-Function-Measuring-Wrongness"><a href="#❌-Loss-Function-Measuring-Wrongness" class="headerlink" title="❌ Loss Function: Measuring Wrongness"></a>❌ Loss Function: Measuring Wrongness</h3><p>After the model makes predictions, we need to evaluate how “wrong” those predictions are. That’s where the <strong>loss function</strong> comes in.</p>
+<p>A loss function computes the difference between predicted values and actual values. A popular choice for regression problems (like housing price) is <strong>Mean Squared Error (MSE)</strong>:<br>MSE &#x3D; average((predicted - actual)^2)</p>
+<p>Example:</p>
+<ul>
+<li>Predicted price: $500,000  </li>
+<li>Actual price: $600,000  </li>
+<li>Error &#x3D; (600,000 - 500,000)^2 &#x3D; 10,000,000,000</li>
+</ul>
+<p>We compute this for every sample and average it to get the total loss.</p>
+<hr>
+<h3 id="🔁-Backpropagation"><a href="#🔁-Backpropagation" class="headerlink" title="🔁 Backpropagation"></a>🔁 Backpropagation</h3><p>Once we know how wrong the prediction was, we need to <strong>adjust the weights</strong> to improve next time. This is where <strong>backpropagation</strong> comes in.</p>
+<p>Backpropagation efficiently calculates how much each weight contributed to the error. It uses this information to guide how each weight should change.</p>
+<p>Think of it as feedback being passed backward through the network — correcting the path step by step.</p>
+<hr>
+<h3 id="🔻-Gradient-Descent"><a href="#🔻-Gradient-Descent" class="headerlink" title="🔻 Gradient Descent"></a>🔻 Gradient Descent</h3><p>To actually update the weights, we use an algorithm called <strong>gradient descent</strong>.</p>
+<p>A <strong>gradient</strong> tells us how steep the error curve is with respect to each weight. Gradient descent takes a small step in the direction that <strong>reduces</strong> the loss:</p>
+<p>new_weight &#x3D; weight - learning_rate * gradient</p>
+<p>The <strong>learning rate</strong> controls how big the steps are. If it’s too big, you overshoot; if it’s too small, learning becomes painfully slow.</p>
+<hr>
+<h3 id="🔁-Training-Loop"><a href="#🔁-Training-Loop" class="headerlink" title="🔁 Training Loop"></a>🔁 Training Loop</h3><p>“Practice makes perfect” isn’t just for humans — it applies to neural networks too. Training is just <strong>repeating</strong> the process of:</p>
+<ol>
+<li>Feeding in feature vectors</li>
+<li>Making predictions</li>
+<li>Calculating loss</li>
+<li>Using backpropagation to get gradients</li>
+<li>Applying gradient descent to update weights</li>
+<li>Repeating this process many times</li>
+</ol>
+<p>In code, the training loop might look something like this:</p>
+<pre><code class="language-python">for epoch in range(epochs):
+    predictions = model(features)
+    loss = loss_fn(predictions, labels)
+    loss.backward()
+    optimizer.step()
+    optimizer.zero_grad()
+</code></pre>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="https://zoz24.github.io/2025/04/24/nn-training-cycle/" data-id="cm9vvbn9z0000zw60hc045gfx" data-title="From Neuron to Prediction - A Journey Through Deep Learning" class="article-share-link"><span class="fa fa-share">Share</span></a>
+      
+      
+      
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/deep-learning/" rel="tag">deep learning</a></li></ul>
+
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+  
+    <a href="/2025/04/23/thoughts-on-llm-products/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">Bits of thoughts on LLM based products</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tags</h3>
+    <div class="widget">
+      <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tags/AI/" rel="tag">AI</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/backend/" rel="tag">backend</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/database/" rel="tag">database</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/deep-learning/" rel="tag">deep learning</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/network/" rel="tag">network</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/product/" rel="tag">product</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tag Cloud</h3>
+    <div class="widget tagcloud">
+      <a href="/tags/AI/" style="font-size: 10px;">AI</a> <a href="/tags/backend/" style="font-size: 10px;">backend</a> <a href="/tags/database/" style="font-size: 10px;">database</a> <a href="/tags/deep-learning/" style="font-size: 10px;">deep learning</a> <a href="/tags/network/" style="font-size: 10px;">network</a> <a href="/tags/product/" style="font-size: 10px;">product</a>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archives</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2025/04/">April 2025</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Recent Posts</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2025/04/24/nn-training-cycle/">From Neuron to Prediction - A Journey Through Deep Learning</a>
+          </li>
+        
+          <li>
+            <a href="/2025/04/23/thoughts-on-llm-products/">Bits of thoughts on LLM based products</a>
+          </li>
+        
+          <li>
+            <a href="/2025/04/16/wsl2-vpn/">How to fix WSL network error under VPN environment</a>
+          </li>
+        
+          <li>
+            <a href="/2025/04/14/supabase-storage-deletion-proper/">How to delete stale Supabase Storage objects (The answer is not SQL)</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      
+      &copy; 2025 Zizi<br>
+      Powered by <a href="https://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+
+<script src="/js/jquery-3.6.4.min.js"></script>
+
+
+
+  
+<script src="/fancybox/jquery.fancybox.min.js"></script>
+
+
+
+
+<script src="/js/script.js"></script>
+
+
+
+
+
+  </div>
+</body>
+</html>
